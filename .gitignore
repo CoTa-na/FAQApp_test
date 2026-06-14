@@ -1,0 +1,29 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+
+# User-specific files
+*.user
+*.rsuser
+*.suo
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+
+# Rider
+.idea/
+
+# NuGet
+*.nupkg
+packages/
+
+# ASP.NET Core static web assets cache
+obj/**/staticwebassets/
