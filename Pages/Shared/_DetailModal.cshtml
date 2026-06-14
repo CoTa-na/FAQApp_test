@@ -1,0 +1,193 @@
+@model FAQApp_test.Models.Faq
+@{
+    var safeTitle = (Model.Title ?? string.Empty).Replace("'", "\\'");
+    var created = Model.CreatedAt.ToString("yyyy-MM-dd HH:mm");
+    var updated = Model.UpdatedAt.ToString("yyyy-MM-dd HH:mm");
+}
+
+<div id="detail-modal-root" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div id="modal-overlay" class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"></div>
+
+    <div id="modal-content" class="relative z-10 flex max-h-[85vh] w-full max-w-3xl scale-100 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl transition-all duration-300 dark:border-slate-700 dark:bg-slate-800">
+        <div class="shrink-0 border-b border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-800/50">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800 dark:bg-blue-900/60 dark:text-blue-300">FAQ-@Model.Id</span>
+                    <span class="text-xs text-slate-400">|</span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400">投稿者: @Model.CreatedBy | 作成: @created</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    @Html.AntiForgeryToken()
+                    <button id="modal-download-btn" class="flex items-center space-x-1.5 rounded-lg p-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-200/50 hover:text-emerald-600 dark:text-slate-400 dark:hover:bg-slate-700/50 dark:hover:text-emerald-400" title="Markdownとしてダウンロード" type="button">
+                        <i data-lucide="download" class="h-4.5 w-4.5"></i>
+                        <span class="hidden sm:inline">ダウンロード</span>
+                    </button>
+                    <a asp-page="/Edit" asp-route-id="@Model.Id" class="flex items-center space-x-1.5 rounded-lg p-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-200/50 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-slate-700/50 dark:hover:text-blue-400" title="FAQを編集する">
+                        <i data-lucide="edit-3" class="h-4.5 w-4.5"></i>
+                        <span class="hidden sm:inline">編集</span>
+                    </a>
+                    <form hx-delete="@Url.Page("/Index", "DeleteFaq", new { id = Model.Id })"
+                          hx-target="#faq-list"
+                          hx-swap="outerHTML"
+                          hx-confirm="このFAQを削除してよろしいですか？">
+                        <button type="submit"
+                                class="flex items-center space-x-1.5 rounded-lg p-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-200/50 hover:text-rose-600 dark:text-slate-400 dark:hover:bg-slate-700/50 dark:hover:text-rose-400"
+                                title="FAQを削除する">
+                            <i data-lucide="trash-2" class="h-4.5 w-4.5"></i>
+                            <span class="hidden sm:inline">削除</span>
+                        </button>
+                    </form>
+                    <span class="mx-1 h-5 w-px text-slate-300 dark:text-slate-600"></span>
+                    <button id="modal-close-btn" class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-200/50 hover:text-slate-600 dark:hover:bg-slate-700/50 dark:hover:text-slate-200" type="button">
+                        <i data-lucide="x" class="h-5 w-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="markdown-body flex-grow overflow-y-auto p-8" id="modal-markdown-body">
+            <h1 class="mb-4 text-2xl font-bold">@Model.Title</h1>
+            @Html.Raw(Model.HtmlContent ?? "<p>内容がありません。</p>")
+        </div>
+
+        <div class="flex shrink-0 items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-4 text-xs text-slate-400 dark:border-slate-700 dark:bg-slate-800/50">
+            <div>更新日: <span>@updated</span></div>
+            <div class="flex items-center space-x-2">
+                <span class="flex items-center space-x-1">
+                    <i data-lucide="keyboard" class="h-4 w-4"></i>
+                    <span>キーボード: ← / → で移動, Escでクローズ</span>
+                </span>
+            </div>
+        </div>
+
+        @if (Model.PrevId.HasValue)
+        {
+            <button id="nav-prev-btn"
+                    class="absolute left-4 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-xl transition-all hover:scale-110 hover:text-blue-600 active:scale-95 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:text-blue-400"
+                    title="前のFAQ (キーボード: ←)"
+                    type="button"
+                    hx-get="@Url.Page("/Index", "DetailModal", new { id = Model.PrevId })"
+                    hx-target="#modal-container"
+                    hx-swap="innerHTML">
+                <i data-lucide="chevron-left" class="h-6 w-6"></i>
+            </button>
+        }
+
+        @if (Model.NextId.HasValue)
+        {
+            <button id="nav-next-btn"
+                    class="absolute right-4 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-xl transition-all hover:scale-110 hover:text-blue-600 active:scale-95 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:text-blue-400"
+                    title="次のFAQ (キーボード: →)"
+                    type="button"
+                    hx-get="@Url.Page("/Index", "DetailModal", new { id = Model.NextId })"
+                    hx-target="#modal-container"
+                    hx-swap="innerHTML">
+                <i data-lucide="chevron-right" class="h-6 w-6"></i>
+            </button>
+        }
+    </div>
+
+    <textarea id="raw-markdown" class="hidden">@Model.Content</textarea>
+</div>
+
+<script>
+    (function () {
+        var modalRoot = document.getElementById("detail-modal-root");
+        if (!modalRoot) {
+            return;
+        }
+
+        window.closeModal = function () {
+            var container = document.getElementById("modal-container");
+            if (container) {
+                container.innerHTML = "";
+            }
+            document.body.classList.remove("overflow-hidden");
+        };
+
+        document.body.classList.add("overflow-hidden");
+
+        var overlay = document.getElementById("modal-overlay");
+        var closeBtn = document.getElementById("modal-close-btn");
+
+        if (overlay) {
+            overlay.addEventListener("click", window.closeModal);
+        }
+        if (closeBtn) {
+            closeBtn.addEventListener("click", window.closeModal);
+        }
+
+        function triggerNav(id) {
+            var btn = document.getElementById(id);
+            if (btn) {
+                btn.click();
+            }
+        }
+
+        var keyHandler = function (e) {
+            if (!document.getElementById("detail-modal-root")) {
+                document.removeEventListener("keydown", keyHandler);
+                return;
+            }
+
+            if (e.key === "Escape") {
+                window.closeModal();
+            }
+            if (e.key === "ArrowLeft") {
+                triggerNav("nav-prev-btn");
+            }
+            if (e.key === "ArrowRight") {
+                triggerNav("nav-next-btn");
+            }
+        };
+
+        document.addEventListener("keydown", keyHandler);
+
+        var downloadBtn = document.getElementById("modal-download-btn");
+        if (downloadBtn) {
+            downloadBtn.addEventListener("click", function () {
+                var title = "@safeTitle";
+                var createdBy = "@Model.CreatedBy";
+                var createdAt = "@created";
+                var updatedAt = "@updated";
+                var id = "@Model.Id";
+                var markdown = document.getElementById("raw-markdown")?.value || "";
+
+                var markdownString = [
+                    "---",
+                    "id: FAQ-" + id,
+                    "title: " + title,
+                    "createdBy: " + createdBy,
+                    "createdAt: " + createdAt,
+                    "updatedAt: " + updatedAt,
+                    "---",
+                    "",
+                    "# " + title,
+                    "",
+                    markdown
+                ].join("\n");
+
+                var blob = new Blob([markdownString], { type: "text/markdown;charset=utf-8;" });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement("a");
+                a.href = url;
+                a.download = ("FAQ-" + id + "_" + title).replace(/[\\/\\?%\\*:|\"<>\\s]/g, "_") + ".md";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        var deleteForm = modalRoot.querySelector("form[hx-delete]");
+        if (deleteForm) {
+            deleteForm.addEventListener("htmx:afterRequest", function () {
+                window.closeModal();
+            });
+        }
+
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    })();
+</script>

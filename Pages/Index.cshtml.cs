@@ -1,12 +1,19 @@
 using FAQApp_test.Models;
 using FAQApp_test.Repositories;
+using Markdig;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FAQApp_test.Pages
 {
+    [IgnoreAntiforgeryToken]
     public class IndexModel : PageModel
     {
+        private static readonly MarkdownPipeline MarkdownPipeline = new MarkdownPipelineBuilder()
+            .DisableHtml()
+            .UseAdvancedExtensions()
+            .Build();
+
         private readonly IFaqRepository _faqRepository;
         private readonly ILogger<IndexModel> _logger;
 
@@ -72,6 +79,43 @@ namespace FAQApp_test.Pages
             ViewData["SearchKeyword"] = searchKeyword;
             return Partial("_FaqList", faqs);
 
+        }
+
+        public async Task<PartialViewResult> OnGetDetailModalAsync(int id)
+        {
+            var faq = await _faqRepository.GetByIdAsync(id);
+            if (faq is null)
+            {
+                Response.StatusCode = 404;
+                return Partial("_DetailModal", new Faq
+                {
+                    Title = "Not Found",
+                    Content = string.Empty,
+                    HtmlContent = "<p>FAQが見つかりませんでした。</p>"
+                });
+            }
+
+            faq.HtmlContent = Markdown.ToHtml(faq.Content, MarkdownPipeline);
+            return Partial("_DetailModal", faq);
+        }
+
+        public async Task<PartialViewResult> OnDeleteDeleteFaqAsync(int id, string? searchKeyword)
+        {
+            IReadOnlyList<Faq> faqs;
+
+            try
+            {
+                await _faqRepository.DeleteAsync(id);
+                faqs = await _faqRepository.GetListAsync(searchKeyword);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to delete FAQ by delete handler.");
+                faqs = new List<Faq>();
+            }
+
+            ViewData["SearchKeyword"] = searchKeyword;
+            return Partial("_FaqList", faqs);
         }
     }
 }

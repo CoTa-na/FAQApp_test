@@ -63,7 +63,9 @@ BEGIN
         Content, 
         CreatedBy, 
         CreatedAt, 
-        UpdatedAt
+        UpdatedAt,
+        (SELECT TOP 1 Id FROM faqs WHERE Id < @Id ORDER BY Id DESC) AS PrevId,
+        (SELECT TOP 1 Id FROM faqs WHERE Id > @Id ORDER BY Id ASC) AS NextId
     FROM 
         faqs
     WHERE 
