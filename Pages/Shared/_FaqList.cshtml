@@ -1,0 +1,42 @@
+@model IReadOnlyList<FAQApp_test.Models.Faq>
+@{
+    var searchKeyword = ViewData["SearchKeyword"] as string ?? string.Empty;
+}
+
+<div id="faq-list" class="space-y-4">
+    @if (!Model.Any())
+    {
+        <div class="rounded-lg border border-slate-200 bg-white p-6 text-center text-slate-500 shadow-sm">
+            FAQが見つかりませんでした。
+        </div>
+    }
+    else
+    {
+        @foreach (var faq in Model)
+        {
+            <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-900">@faq.Title</h3>
+                        <p class="mt-1 text-sm text-slate-500">作成者: @faq.CreatedBy | 作成日: @faq.CreatedAt.ToString("yyyy/MM/dd HH:mm")</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <a asp-page="/Edit" asp-route-id="@faq.Id" class="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700">編集</a>
+                        <form method="post"
+                              asp-page="/Index"
+                              asp-page-handler="Delete"
+                              hx-post="@Url.Page("/Index", "Delete")"
+                              hx-target="#faq-list"
+                              hx-swap="outerHTML"
+                              hx-confirm="このFAQを削除しますか？">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@faq.Id" />
+                            <input type="hidden" name="searchKeyword" value="@searchKeyword" />
+                            <button type="submit" class="rounded-md border border-rose-300 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100">削除</button>
+                        </form>
+                    </div>
+                </div>
+            </article>
+        }
+    }
+</div>

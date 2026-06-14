@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #0f766e;
+  --font-sans: "Noto Sans JP", "Yu Gothic UI", "Meiryo", sans-serif;
+}
+
+@source "../../Pages/**/*.cshtml";
+@source "../../Pages/**/*.cshtml.cs";

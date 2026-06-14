@@ -1,0 +1,40 @@
+@page "{id:int}"
+@model FAQApp_test.Pages.EditModel
+@{
+    ViewData["Title"] = "FAQ編集";
+}
+
+<section class="space-y-6">
+    <h1 class="text-2xl font-bold text-slate-900">FAQ編集</h1>
+
+    <form method="post" class="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <input type="hidden" asp-for="Faq.Id" />
+        <input type="hidden" asp-for="Faq.CreatedBy" />
+        <div asp-validation-summary="ModelOnly" class="text-sm text-rose-600"></div>
+
+        <div>
+            <label asp-for="Faq.Title" class="mb-1 block text-sm font-medium text-slate-700"></label>
+            <input asp-for="Faq.Title" class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none ring-emerald-500 focus:ring" />
+            <span asp-validation-for="Faq.Title" class="text-sm text-rose-600"></span>
+        </div>
+
+        <div>
+            <label asp-for="Faq.Content" class="mb-1 block text-sm font-medium text-slate-700"></label>
+            <textarea asp-for="Faq.Content" rows="12" class="w-full rounded-md border border-slate-300 px-3 py-2 outline-none ring-emerald-500 focus:ring"></textarea>
+            <span asp-validation-for="Faq.Content" class="text-sm text-rose-600"></span>
+        </div>
+
+        <div class="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-600">
+            作成者: @Model.Faq.CreatedBy
+        </div>
+
+        <div class="flex gap-2">
+            <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-500">更新</button>
+            <a asp-page="/Index" class="rounded-md border border-slate-300 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50">キャンセル</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

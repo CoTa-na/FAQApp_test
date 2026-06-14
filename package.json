@@ -1,0 +1,26 @@
+{
+  "name": "faqapp_test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "tailwindcss -i ./wwwroot/css/input.css -o ./wwwroot/css/site.css --minify",
+    "watch:css": "tailwindcss -i ./wwwroot/css/input.css -o ./wwwroot/css/site.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoTa-na/FAQApp_test.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/CoTa-na/FAQApp_test/issues"
+  },
+  "homepage": "https://github.com/CoTa-na/FAQApp_test#readme",
+  "description": "",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.1",
+    "tailwindcss": "^4.3.1"
+  }
+}

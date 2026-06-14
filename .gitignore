@@ -30,3 +30,6 @@ obj/**/staticwebassets/
 
 # App settings
 appsettings.Development.json
+
+# Node
+node_modules/
